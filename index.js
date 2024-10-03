@@ -9,7 +9,7 @@ import path, { dirname, join } from 'path';
 
 dotenv.config();
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Helper function to get __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
