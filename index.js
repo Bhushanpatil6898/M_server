@@ -19,7 +19,7 @@ const __dirname = dirname(__filename);
 app.use(cors({
   origin: [ 
     'https://fastidious-biscuit-b316c6.netlify.app',  // Your Netlify site
-    'http://localhost:3001'  // Localhost for development
+    'http://localhost:3000'  // Localhost for development
   ],
   credentials: true  // Allow credentials such as cookies or authentication headers
 }));
