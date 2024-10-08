@@ -17,7 +17,7 @@ const __dirname = dirname(__filename);
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'https://guileless-biscotti-e48f0b.netlify.app',
   credentials: true  
 }));
 
