@@ -16,7 +16,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({
+  origin: [ 
+    'https://fastidious-biscuit-b316c6.netlify.app',  // Your Netlify site
+    'http://localhost:3001'  // Localhost for development
+  ],
+  credentials: true  // Allow credentials such as cookies or authentication headers
+}));
+
 app.use(bodyParser.json());
 
 // Serve static files from the "uploads" directory
