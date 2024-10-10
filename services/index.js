@@ -1,5 +1,5 @@
 
- import  { BillModel, clientModel, productModel } from './../schemas/index.js';
+ import  BillModel, {  clientModel, productModel } from './../schemas/index.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
@@ -82,7 +82,7 @@ export const Profile = async (req, res) => {
  // 'image' is the field name for the uploaded file
 
 export const addProduct = async (req, res) => {
-  console.log(req.body);
+  
 
   uploadImage(req, res, async function (err) {
     if (err) {
@@ -141,25 +141,38 @@ export const GetProduct = async (req, res) => {
 };
 export const createBill = async (req, res) => {
   try {
-    const { customerName, contactNumber, address, productList, totalAmount } = req.body;
-    console.log(req.body);
-    
+    const { customerName, contactNumber, address, productList, totalAmount } = req.bod
+    const formattedProductList = productList.map(product => ({
+      productName: product.productName,
+      quantity: Number(product.quantity), 
+      price: Number(product.price) 
+    }));
 
     // Create a new Bill object
     const newBill = new BillModel({
       customerName,
       contactNumber,
       address,
-      productList,
-      totalAmount
+      productList: formattedProductList, 
+      totalAmount: Number(totalAmount) 
     });
-
-    // Save bill in MongoDB
     await newBill.save();
 
     // Return success response
-    res.status(201).json({ message: 'Bill created successfully', bill: newBill });
+    res.status(200).json({ message: 'Bill created successfully', bill: newBill });
   } catch (error) {
+    console.error('Error creating bill:', error); // Log error for debugging
     res.status(500).json({ message: 'Error creating bill', error: error.message });
+  }
+};
+
+export const getAllBills = async (req, res) => {
+  
+  try {
+    const bills = await BillModel.find();
+    res.status(200).json({ message: 'Bills retrieved successfully', bills });
+  } catch (error) {
+    console.error('Error retrieving bills:', error); // Log error for debugging
+    res.status(500).json({ message: 'Error retrieving bills', error: error.message });
   }
 };

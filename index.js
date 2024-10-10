@@ -17,7 +17,10 @@ const __dirname = dirname(__filename);
 
 // Middleware
 app.use(cors({
-  origin: 'https://mahaluxmi-hardwear.netlify.app',
+  origin: [
+    'https://mahaluxmi-hardwear.netlify.app', // Your Netlify site
+    'http://localhost:3000'  // Localhost for development
+  ],
   credentials: true  
 }));
 

@@ -16,6 +16,8 @@ const clientSchema = new Schema({
 });
 export const clientModel = mongoose.model("client", clientSchema, "client");
 
+
+
 const billSchema = new mongoose.Schema({
   customerName: {
     type: String,
@@ -44,7 +46,11 @@ const billSchema = new mongoose.Schema({
     default: Date.now
   }
 });
-export const BillModel = mongoose.model("Bill", billSchema, "Bill");
+
+const BillModel = mongoose.model('Bill', billSchema);
+
+export default BillModel;
+
 
 
 const productSchema = new Schema({
