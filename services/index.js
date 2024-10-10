@@ -1,5 +1,5 @@
 
- import { clientModel, productModel } from './../schemas/index.js';
+ import  { BillModel, clientModel, productModel } from './../schemas/index.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
@@ -82,6 +82,7 @@ export const Profile = async (req, res) => {
  // 'image' is the field name for the uploaded file
 
 export const addProduct = async (req, res) => {
+  console.log(req.body);
 
   uploadImage(req, res, async function (err) {
     if (err) {
@@ -89,7 +90,7 @@ export const addProduct = async (req, res) => {
     }
 
     const { name, description, price, stock, category, brand, sku} = req.body;
-    console.log(req.body,"callh",req.file);
+    
     try {
       // Check for existing product by SKU
       const existingProduct = await productModel.findOne({ sku });
@@ -136,5 +137,29 @@ export const GetProduct = async (req, res) => {
   } catch (error) {
     console.error('Error during data retrieval:', error);
     return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+export const createBill = async (req, res) => {
+  try {
+    const { customerName, contactNumber, address, productList, totalAmount } = req.body;
+    console.log(req.body);
+    
+
+    // Create a new Bill object
+    const newBill = new BillModel({
+      customerName,
+      contactNumber,
+      address,
+      productList,
+      totalAmount
+    });
+
+    // Save bill in MongoDB
+    await newBill.save();
+
+    // Return success response
+    res.status(201).json({ message: 'Bill created successfully', bill: newBill });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating bill', error: error.message });
   }
 };

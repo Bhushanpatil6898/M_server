@@ -37,3 +37,9 @@ export const uploadImage = multer({
   })
 }).single("image");
 
+export const uploadPDF = (pdfBuffer, filename) => {
+  const pdfPath = path.join(__dirname, '../mahaluxmi_hardware/', filename);
+  
+  fs.writeFileSync(pdfPath, pdfBuffer);
+  return `/mahaluxmi_hardware/${filename}`;  // Return the relative path to the file
+};

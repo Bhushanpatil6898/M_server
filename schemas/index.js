@@ -16,6 +16,36 @@ const clientSchema = new Schema({
 });
 export const clientModel = mongoose.model("client", clientSchema, "client");
 
+const billSchema = new mongoose.Schema({
+  customerName: {
+    type: String,
+    required: true
+  },
+  contactNumber: {
+    type: String,
+    required: true
+  },
+  address: {
+    type: String
+  },
+  productList: [
+    {
+      productName: { type: String, required: true },
+      quantity: { type: Number, required: true },
+      price: { type: Number, required: true }
+    }
+  ],
+  totalAmount: {
+    type: Number,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+export const BillModel = mongoose.model("Bill", billSchema, "Bill");
+
 
 const productSchema = new Schema({
   name: { type: String, required: true },

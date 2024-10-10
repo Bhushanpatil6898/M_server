@@ -3,6 +3,7 @@ import {
  
   addProduct,
 
+  createBill,
   GetProduct,
   Login,
   Profile,
@@ -17,6 +18,7 @@ routes.post('/login', Login);
 routes.post('/add-product', addProduct);
 routes.get('/profile', Profile);
 routes.get('/get-product', GetProduct);
+routes.post('/add-bill', createBill);
 
 
 
