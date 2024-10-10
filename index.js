@@ -17,11 +17,8 @@ const __dirname = dirname(__filename);
 
 // Middleware
 app.use(cors({
-  origin: [ 
-    'https://fastidious-biscuit-b316c6.netlify.app',  // Your Netlify site
-    'http://localhost:3001'  // Localhost for development
-  ],
-  credentials: true  // Allow credentials such as cookies or authentication headers
+  origin: 'https://mahaluxmi-hardwear.netlify.app',
+  credentials: true  
 }));
 
 app.use(bodyParser.json());
