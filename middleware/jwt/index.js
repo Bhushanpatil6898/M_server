@@ -1,29 +1,30 @@
-import jwt from 'jsonwebtoken'
-export const verify = (req, resp, next) => {
-    const authHeaders = req.headers.authorization;
-    if (!authHeaders) return resp.status(203).json({
-        massg: "Your not Authorized!",
-    });
+import jwt from 'jsonwebtoken';
+import createError from 'http-errors'; 
 
-    const token = authHeaders.split(" ")[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, user) => {
-        if (err) {
-            return resp.status(203).json({
-                massg: "Token is not valid",
-            });
-        }
-        else {
-            req.user = user;
-            next();
-        }
-    });
+// Generate JWT token
+export const cretaeToken = (payload) => {
+    if (!process.env.JWT_SECRET || !process.env.EXPIRESIN) {
+        throw new Error('JWT_SECRET and EXPIRESIN must be defined in environment variables');
+    }
+    return jwt.sign(
+        { id: payload.id },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.EXPIRESIN }
+    );
 };
 
 
-export const generateAccessToken = (payload) => {
-    return jwt.sign(
-        { id: payload.id},
-        process.env.ACCESS_TOKEN_SECRET_KEY,
-        { expiresIn: process.env.EXPIRES_IN }
-    )
-}
+export const cheack = async (req, res, next) => {
+    const { token } = req.cookies;
+
+    if (!token) {
+        return next(createError(401, "Authentication token not found")); // 401 Unauthorized
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return next(createError(403, "Token is not valid")); // 403 Forbidden
+
+        req.user = user;
+        next(); 
+    });
+};

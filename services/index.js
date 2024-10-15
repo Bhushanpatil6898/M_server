@@ -2,7 +2,8 @@
  import  BillModel, {  clientModel, productModel } from './../schemas/index.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-
+import jwt from 'jsonwebtoken'; // Import jwt for token generation
+ // Replace with your actual clientModel path
 import { uploadImage } from '../middleware/multer/index.js';
 dotenv.config();
 
@@ -37,28 +38,36 @@ export const registetration = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
 export const Login = async (req, res) => {
-  const { email, password } = req.body; 
+  const { email, password } = req.body;
+
   try {
     // Find user by email
     const user = await clientModel.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
+
+    // Check if the password matches
     if (password !== user.password) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-
-    // Send the token and user data in response
     return res.status(200).json({
-      message: 'Login successful',
-      user
+      message: 'Login successful',// Send the generated token
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role, // Only send necessary user data
+      }
     });
   } catch (error) {
     console.error('Error during login:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 export const Profile = async (req, res) => {
   const id = "66b5fcf200b03fc661eefa1f";
   try {
@@ -140,8 +149,10 @@ export const GetProduct = async (req, res) => {
   }
 };
 export const createBill = async (req, res) => {
+  console.log( req.body);
+  
   try {
-    const { customerName, contactNumber, address, productList, totalAmount } = req.bod
+    const { customerName, contactNumber, address, productList, totalAmount } = req.body
     const formattedProductList = productList.map(product => ({
       productName: product.productName,
       quantity: Number(product.quantity), 
