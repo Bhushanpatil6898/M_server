@@ -2,9 +2,8 @@
  import  BillModel, {  clientModel, productModel } from './../schemas/index.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken'; // Import jwt for token generation
- // Replace with your actual clientModel path
 import { uploadImage } from '../middleware/multer/index.js';
+import { createToken } from '../middleware/jwt/index.js';
 dotenv.config();
 
 
@@ -40,44 +39,43 @@ export const registetration = async (req, res) => {
 };
 
 
+
+
 export const Login = async (req, res) => {
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  try {
-    // Find user by email
-    const user = await clientModel.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+    try {
+        // Find user by email
+        const user = await clientModel.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-    // Check if the password matches
-    if (password !== user.password) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+        // Check if the password matches using bcrypt
+        if (password !== user.password) {
+          return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        // Generate token
+        const accessToken = createToken(user);
+        res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+        res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+
+        return res.status(200).json({ message: "Login successful!", user: user });
+    } catch (error) {
+        console.error('Error during login:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
-    return res.status(200).json({
-      message: 'Login successful',// Send the generated token
-      user: {
-        id: user._id,
-        email: user.email,
-        role: user.role, // Only send necessary user data
-      }
-    });
-  } catch (error) {
-    console.error('Error during login:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
 };
 
 export const Profile = async (req, res) => {
-  const id = "66b5fcf200b03fc661eefa1f";
+ 
+  const { id } = req.user;
   try {
-    // Find user by ID
     const user = await clientModel.findById(id);
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
-
-    // Send the user data in response
     return res.status(200).json({
       message: 'User data',
       user
@@ -87,7 +85,14 @@ export const Profile = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+export const verification = (req, res, next) => {
+  const cookies = req.cookies;
+  const { token, role } = cookies
+console.log(token, role);
 
+  
+ 
+}
  // 'image' is the field name for the uploaded file
 
 export const addProduct = async (req, res) => {
@@ -148,9 +153,25 @@ export const GetProduct = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+export const deleteProduct = async (req, res) => {
+  const { productId } = req.body;
+ 
+  try {
+    // Find and delete the product by ID
+    const deletedProduct = await productModel.findByIdAndDelete(productId);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    return res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const createBill = async (req, res) => {
-  console.log( req.body);
-  
   try {
     const { customerName, contactNumber, address, productList, totalAmount } = req.body
     const formattedProductList = productList.map(product => ({

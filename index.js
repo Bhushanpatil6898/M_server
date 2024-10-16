@@ -6,7 +6,7 @@ import routes from './routes/index.js';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path, { dirname, join } from 'path';
-
+import cookieParser from 'cookie-parser';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,6 +25,7 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 // Serve static files from the "uploads" directory
 

@@ -1,21 +1,31 @@
 import jwt from 'jsonwebtoken';
 import createError from 'http-errors'; 
+import dotenv from 'dotenv';
+dotenv.config();
 
-// Generate JWT token
-export const cretaeToken = (payload) => {
-    if (!process.env.JWT_SECRET || !process.env.EXPIRESIN) {
-        throw new Error('JWT_SECRET and EXPIRESIN must be defined in environment variables');
-    }
-    return jwt.sign(
-        { id: payload.id },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.EXPIRESIN }
-    );
-};
+
+
+
+    export const createToken = (user) => {
+        // Check if environment variables are set
+        if (!process.env.JWT_SECRET || !process.env.EXPIRESIN) {
+          throw new Error('JWT_SECRET and EXPIRESIN must be defined in environment variables');
+        }
+        console.log(user);
+        
+        // Create token using user data and secret
+        return jwt.sign(
+          { id: user._id, email: user.email, role: user.role }, // Payload
+          process.env.JWT_SECRET, // Secret key
+          { expiresIn: process.env.EXPIRESIN } // Expiration time
+        );
+      };
+
 
 
 export const cheack = async (req, res, next) => {
     const { token } = req.cookies;
+console.log(token);
 
     if (!token) {
         return next(createError(401, "Authentication token not found")); // 401 Unauthorized
