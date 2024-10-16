@@ -197,7 +197,23 @@ export const createBill = async (req, res) => {
     res.status(500).json({ message: 'Error creating bill', error: error.message });
   }
 };
+export const deleteBills = async (req, res) => {
+  const { billId } = req.body;
+ 
+  try {
+    // Find and delete the product by ID
+    const deletedProduct = await BillModel.findByIdAndDelete(billId);
 
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+
+    return res.status(200).json({ message: "Bill deleted successfully" });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 export const getAllBills = async (req, res) => {
   
   try {

@@ -4,6 +4,7 @@ import {
   addProduct,
 
   createBill,
+  deleteBills,
   deleteProduct,
   getAllBills,
   GetProduct,
@@ -25,6 +26,7 @@ routes.get('/profile',cheack, Profile);
 routes.get('/get-product', GetProduct);
 routes.post('/add-bill', createBill);
 routes.get('/bills', getAllBills);
+routes.post('/delete-bill', deleteBills);
 
 
 
