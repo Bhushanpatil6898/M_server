@@ -7,12 +7,9 @@ dotenv.config();
 
 
     export const createToken = (user) => {
-        // Check if environment variables are set
         if (!process.env.JWT_SECRET || !process.env.EXPIRESIN) {
           throw new Error('JWT_SECRET and EXPIRESIN must be defined in environment variables');
         }
-        console.log(user);
-        
         // Create token using user data and secret
         return jwt.sign(
           { id: user._id, email: user.email, role: user.role }, // Payload
@@ -25,8 +22,6 @@ dotenv.config();
 
 export const cheack = async (req, res, next) => {
     const { token } = req.cookies;
-console.log(token);
-
     if (!token) {
         return next(createError(401, "Authentication token not found")); // 401 Unauthorized
     }

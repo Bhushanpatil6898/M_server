@@ -12,6 +12,7 @@ const clientSchema = new Schema({
   state: { type: String },
   password:{type:String},
   role:{type: String, default: "client"},
+  profileImage: { type: String },
   
 });
 export const clientModel = mongoose.model("client", clientSchema, "client");

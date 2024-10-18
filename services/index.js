@@ -2,7 +2,7 @@
  import  BillModel, {  clientModel, productModel } from './../schemas/index.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import { uploadImage } from '../middleware/multer/index.js';
+import { uploadImage, uploadprofile } from '../middleware/multer/index.js';
 import { createToken } from '../middleware/jwt/index.js';
 dotenv.config();
 
@@ -67,6 +67,18 @@ export const Login = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
+export const logout = async (req, res, next) => {
+  try {
+      // Clear token and role cookies
+      res.clearCookie('token');
+      res.clearCookie('role');
+
+      // Optionally, you can send a logout message or redirect the user to a different page
+      return res.status(200).json({ message: "Logout successful!" });
+  } catch (error) {
+      return next(createError(500, "An error occurred while logging out"))
+  }
+}
 
 export const Profile = async (req, res) => {
  
@@ -85,15 +97,31 @@ export const Profile = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
+import jwt from 'jsonwebtoken';
+
 export const verification = (req, res, next) => {
   const cookies = req.cookies;
-  const { token, role } = cookies
-console.log(token, role);
+  const { token, role } = cookies;
 
-  
- 
-}
- // 'image' is the field name for the uploaded file
+  // Check if token and role exist
+  if (!token || !role) {
+    return res.status(401).json({ message: 'User not authorized. Token or role is missing.' });
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decodedUser) => {
+    if (err) {
+      return res.status(403).json({ message: 'Token is not valid.' });
+    }
+
+    // Attach user details to req object
+    req.user = decodedUser;
+    const { id } = decodedUser;
+
+    // Return successful response with user id and role
+    return res.status(200).json({ id, role });
+  });
+};
+
+
 
 export const addProduct = async (req, res) => {
   
@@ -154,7 +182,6 @@ export const GetProduct = async (req, res) => {
   }
 };
 export const deleteProduct = async (req, res) => {
-  const { productId } = req.body;
  
   try {
     // Find and delete the product by ID
@@ -198,7 +225,7 @@ export const createBill = async (req, res) => {
   }
 };
 export const deleteBills = async (req, res) => {
-  const { billId } = req.body;
+
  
   try {
     // Find and delete the product by ID
@@ -223,4 +250,73 @@ export const getAllBills = async (req, res) => {
     console.error('Error retrieving bills:', error); // Log error for debugging
     res.status(500).json({ message: 'Error retrieving bills', error: error.message });
   }
+};
+export const updatepassword = async (req, res) => {
+  try {
+    const { id } = req.user; // Assuming req.user is populated by authentication middleware
+    const { password } = req.body;
+
+    // Fetch user from the database
+    const user = await clientModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if new password is the same as the current password
+    if (user.password === password) {
+      return res.status(400).json({ message: "New password and old password are the same" });
+    }
+
+    // Update the password
+    user.password = password;
+    await user.save();
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+export const updateProfile = async (req, res) => {
+  // Use the image upload middleware to handle the profile image upload
+  uploadprofile(req, res, async function (err) {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    const { id } = req.user; 
+    const { firstName, lastName, email, mobileNumber, city, state, country } = req.body;
+
+
+    try {
+      // Fetch user from the database
+      const user = await clientModel.findById(id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Update user information
+      user.firstName = firstName || user.firstName;
+      user.lastName = lastName || user.lastName;
+      user.email = email || user.email;
+      user.mobileNumber = mobileNumber || user.mobileNumber;
+      user.city = city || user.city;
+      user.state = state || user.state;
+      user.country = country || user.country;
+      user.password=user.password;
+
+     
+      if (req.file) {
+        user.profileImage = req.file.path; 
+      }
+
+      // Save the updated user
+      await user.save();
+
+      return res.status(200).json({ message: "Profile updated successfully", user });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Server error" });
+    }
+  });
 };
