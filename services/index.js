@@ -4,8 +4,14 @@ import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { uploadImage, uploadprofile } from '../middleware/multer/index.js';
 import { createToken } from '../middleware/jwt/index.js';
+import jwt from 'jsonwebtoken';
 dotenv.config();
 
+export const server = (req, res) => {
+  
+  res.status(200).send('Server is alive and working!');
+ 
+};
 
 
 export const registetration = async (req, res) => {
@@ -97,7 +103,7 @@ export const Profile = async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
-import jwt from 'jsonwebtoken';
+
 
 export const verification = (req, res, next) => {
   const cookies = req.cookies;

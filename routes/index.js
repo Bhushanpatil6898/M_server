@@ -12,6 +12,7 @@ import {
   logout,
   Profile,
   registetration,
+  server,
   updatepassword,
   updateProfile,
   verification
@@ -20,6 +21,7 @@ import {
 import { cheack } from "../middleware/jwt/index.js";
 
 const routes = express.Router();
+routes.get('/ping', server);
 routes.post('/verification', verification);
 routes.post('/register', registetration);
 routes.post('/login', Login);
