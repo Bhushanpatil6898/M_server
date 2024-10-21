@@ -48,31 +48,39 @@ export const registetration = async (req, res) => {
 
 
 export const Login = async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    try {
-        // Find user by email
-        const user = await clientModel.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
-
-        // Check if the password matches using bcrypt
-        if (password !== user.password) {
+  try {
+      // Find user by email
+      const user = await clientModel.findOne({ email });
+      if (!user) {
           return res.status(401).json({ message: 'Invalid email or password' });
-        }
+      }
+     
 
-        // Generate token
-        const accessToken = createToken(user);
-        res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-        res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      // Direct password comparison
+      if (password !== user.password) {
+          return res.status(401).json({ message: 'Invalid email or password' });
+      }
+      // console.log('Password matched successfully');
 
-        return res.status(200).json({ message: "Login successful!", user: user });
-    } catch (error) {
-        console.error('Error during login:', error);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
+      // // Generate token (log token creation)
+      // const accessToken = createToken(user);
+      // console.log('Token generated successfully:', accessToken);
+
+      // // Set cookies
+      // res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      // res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      // console.log('Cookies set successfully');
+
+      return res.status(200).json({ message: 'Login successful!', user });
+  } catch (error) {
+      console.error('Error during login:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+  }
 };
+
+
 export const logout = async (req, res, next) => {
   try {
       // Clear token and role cookies
