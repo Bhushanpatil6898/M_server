@@ -3,22 +3,21 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const clientSchema = new Schema({
-  firstName : { type: String },
-  lastName:{type:String},
+  firstName: { type: String },
+  lastName: { type: String },
   mobileNumber: { type: String },
   email: { type: String },
   country: { type: String },
   city: { type: String },
   state: { type: String },
-  password:{type:String},
-  role:{type: String, default: "client"},
+  password: { type: String },
+  role: { type: String, default: "client" },
   profileImage: { type: String },
-  
+  status: { type: String, enum: ["active", "inactive"], default: "inactive" },
+  permissions: { type: String, enum: ["granted", "notGranted"], default: "notGranted" }
 });
+
 export const clientModel = mongoose.model("client", clientSchema, "client");
-
-
-
 const billSchema = new mongoose.Schema({
   customerName: {
     type: String,

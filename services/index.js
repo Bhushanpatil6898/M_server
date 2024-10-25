@@ -62,16 +62,16 @@ export const Login = async (req, res) => {
       if (password !== user.password) {
           return res.status(401).json({ message: 'Invalid email or password' });
       }
-      // console.log('Password matched successfully');
+      console.log('Password matched successfully');
 
-      // // Generate token (log token creation)
-      // const accessToken = createToken(user);
-      // console.log('Token generated successfully:', accessToken);
+      // Generate token (log token creation)
+      const accessToken = createToken(user);
+      console.log('Token generated successfully:', accessToken);
 
-      // // Set cookies
-      // res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      // res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      // console.log('Cookies set successfully');
+      // Set cookies
+      res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      console.log('Cookies set successfully');
 
       return res.status(200).json({ message: 'Login successful!', user });
   } catch (error) {
@@ -198,7 +198,8 @@ export const GetProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
  
   try {
-    // Find and delete the product by ID
+    const{productId}=req.body;
+  
     const deletedProduct = await productModel.findByIdAndDelete(productId);
 
     if (!deletedProduct) {
@@ -242,7 +243,7 @@ export const deleteBills = async (req, res) => {
 
  
   try {
-    // Find and delete the product by ID
+    const{billId}=req.body;
     const deletedProduct = await BillModel.findByIdAndDelete(billId);
 
     if (!deletedProduct) {
@@ -263,6 +264,17 @@ export const getAllBills = async (req, res) => {
   } catch (error) {
     console.error('Error retrieving bills:', error); // Log error for debugging
     res.status(500).json({ message: 'Error retrieving bills', error: error.message });
+  }
+};
+export const getAllUsers = async (req, res) => {
+  console.log("heloo");
+  
+  try {
+    const users = await clientModel.find();
+    res.status(200).json({ message: 'User retrieved successfully', users });
+  } catch (error) {
+    console.error('Error retrieving Users:', error); // Log error for debugging
+    res.status(500).json({ message: 'Error retrieving Users', error: error.message });
   }
 };
 export const updatepassword = async (req, res) => {

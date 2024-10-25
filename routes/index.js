@@ -7,6 +7,7 @@ import {
   deleteBills,
   deleteProduct,
   getAllBills,
+  getAllUsers,
   GetProduct,
   Login,
   logout,
@@ -30,6 +31,7 @@ routes.post('/add-product', addProduct);
 routes.post('/delete-product', deleteProduct);
 routes.get('/profile',cheack, Profile);
 routes.get('/get-product', GetProduct);
+routes.get('/get-client', getAllUsers);
 routes.post('/add-bill', createBill);
 routes.get('/bills', getAllBills);
 routes.post('/delete-bill', deleteBills);
