@@ -62,16 +62,16 @@ export const Login = async (req, res) => {
       if (password !== user.password) {
           return res.status(401).json({ message: 'Invalid email or password' });
       }
-      console.log('Password matched successfully');
+      // console.log('Password matched successfully');
 
-      // Generate token (log token creation)
-      const accessToken = createToken(user);
-      console.log('Token generated successfully:', accessToken);
+      // // Generate token (log token creation)
+      // const accessToken = createToken(user);
+      // console.log('Token generated successfully:', accessToken);
 
-      // Set cookies
-      res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      console.log('Cookies set successfully');
+      // // Set cookies
+      // res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      // res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      // console.log('Cookies set successfully');
 
       return res.status(200).json({ message: 'Login successful!', user });
   } catch (error) {
