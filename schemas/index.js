@@ -22,7 +22,7 @@ export const clientModel = mongoose.model("client", clientSchema, "client");
 const otp = new mongoose.Schema({
   otp: { type: String },
   email: { type: String },
-  created_at: { type: Date, default: Date.now, expires: '1m' }
+  created_at: { type: Date, default: Date.now, expires: '2m' }
 })
 export const otpmodel = mongoose.model("otp", otp, "otp");
 const billSchema = new mongoose.Schema({
