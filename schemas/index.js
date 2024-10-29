@@ -17,7 +17,14 @@ const clientSchema = new Schema({
   permissions: { type: String, enum: ["granted", "notGranted"], default: "notGranted" }
 });
 
+
 export const clientModel = mongoose.model("client", clientSchema, "client");
+const otp = new mongoose.Schema({
+  otp: { type: String },
+  email: { type: String },
+  created_at: { type: Date, default: Date.now, expires: '1m' }
+})
+export const otpmodel = mongoose.model("otp", otp, "otp");
 const billSchema = new mongoose.Schema({
   customerName: {
     type: String,
@@ -50,9 +57,6 @@ const billSchema = new mongoose.Schema({
 const BillModel = mongoose.model('Bill', billSchema);
 
 export default BillModel;
-
-
-
 const productSchema = new Schema({
   name: { type: String, required: true },
   description: { type: String },

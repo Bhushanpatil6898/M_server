@@ -6,6 +6,7 @@ import {
   createBill,
   deleteBills,
   deleteProduct,
+  genrateotp,
   getAllBills,
   getAllUsers,
   GetProduct,
@@ -25,6 +26,7 @@ const routes = express.Router();
 routes.get('/ping', server);
 routes.post('/verification', verification);
 routes.post('/register', registetration);
+routes.post('/create-otp', genrateotp);
 routes.post('/login', Login);
 routes.post('/logout', logout);
 routes.post('/add-product', addProduct);

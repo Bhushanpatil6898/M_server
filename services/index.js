@@ -1,26 +1,43 @@
 
- import  BillModel, {  clientModel, productModel } from './../schemas/index.js';
+import BillModel, { clientModel, otpmodel, productModel } from './../schemas/index.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { uploadImage, uploadprofile } from '../middleware/multer/index.js';
 import { createToken } from '../middleware/jwt/index.js';
 import jwt from 'jsonwebtoken';
+import { sender } from '../middleware/email/email.sender.js';
+import createOtp from 'otp-generator'
 dotenv.config();
 
 export const server = (req, res) => {
-  
+
   res.status(200).send('Server is alive and working!');
- 
+  //   sender.sendMail({
+  //     from: "patil.bhushan6898@gmail.com", // sender address
+  //     to: "bp147180@gmail.com", // list of receivers
+  //     subject: "hello bhushan", // Subject line
+  //     html:
+  //         "<!DOCTYPE html>" +
+  //         "<html><head><title></title>" +
+  //         "</head><body><div>" +
+  //         `<p>Hello,</p>` +
+  //         "<p>A request has been received to verify your email</p>" +
+  //         "<p>Your OTP is:</p>" +
+  //         `<h2></h2>` +
+  //         "<p>Thank you,</p>" +
+  //         "</div></body></html>",
+  // });
+
 };
 
 
 export const registetration = async (req, res) => {
 
-   const { firstName, lastName, mobileNumber, email, password,city,state,country } = req.body;
+  const { firstName, lastName, mobileNumber, email, password, city, state, country } = req.body;
 
   try {
-    const existingCustomer = await clientModel.findOne({ 
-      $or: [{ email: email }, { mobileNumber: mobileNumber }] 
+    const existingCustomer = await clientModel.findOne({
+      $or: [{ email: email }, { mobileNumber: mobileNumber }]
     });
 
     if (existingCustomer) {
@@ -29,7 +46,7 @@ export const registetration = async (req, res) => {
     const customer = await new clientModel({
       firstName,
       lastName,
-     mobileNumber,
+      mobileNumber,
       email,
       password,
       state,
@@ -45,57 +62,209 @@ export const registetration = async (req, res) => {
 };
 
 
-
-
-export const Login = async (req, res) => {
-  const { email, password } = req.body;
-
+export const genrateotp = async (req, res) => {
+  const { email } = req.body;
   try {
-      // Find user by email
-      const user = await clientModel.findOne({ email });
-      if (!user) {
-          return res.status(401).json({ message: 'Invalid email or password' });
-      }
-     
+    // Find user by email
+    const user = await clientModel.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email' });
+    }
 
-      // Direct password comparison
-      if (password !== user.password) {
-          return res.status(401).json({ message: 'Invalid email or password' });
-      }
-      // console.log('Password matched successfully');
+    // Generate OTP
+    const otp = createOtp.generate(6, {
+      upperCaseAlphabets: false,
+      specialChars: false,
+      lowerCaseAlphabets: false,
+      digits: true
+    });
 
-      // // Generate token (log token creation)
-      // const accessToken = createToken(user);
-      // console.log('Token generated successfully:', accessToken);
+    // Save OTP in the database
+    const sendotp = await otpmodel({
+      email,
+      otp,
+      created_at: new Date(Date.now())
+    });
+    sendotp.save();
 
-      // // Set cookies
-      // res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      // res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      // console.log('Cookies set successfully');
+    // Send email with the OTP
+    sender.sendMail({
+      from: "patil.bhushan6898@gmail.com",
+      to: email,
+      subject: "Your OTP Verification Code from Mahaluxmi Hardware",
+      html: `
+       <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #c6c7c8;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(90deg, #FF8C00, #FF3D00);
+            color: white;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .otp {
+            font-size: 30px;
+            font-weight: bold;
+            color: #FF4500;
+            background-color: #FFF5EE;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            border: 2px solid #FF4500; /* Optional border for emphasis */
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            color: #ffffff;
+            background-color: #FF4500;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+        }
+        a {
+            color: #FF4500;
+            text-decoration: none;
+        }
+        .footer a {
+            color: #FF4500;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Welcome to Mahaluxmi Hardware</div>
+        <div class="content">
+            <p>Hello,</p>
+            <p>We received a request to verify your email. Please use the OTP below to complete your verification:</p>
+            <div class="otp">${otp}</div>
+            <p>If you didn’t request this verification, feel free to ignore this email or contact our support team.</p>
+            <a href="https://mahaluxmihardware.com" class="button">Visit Our Website</a>
+            <p>Thank you for choosing Mahaluxmi Hardware!</p>
+        </div>
+        <div class="footer">
+            <p>Mahaluxmi Hardware, Post Kalmadu, Tal. Chalisgaon, Dist. Jalgaon</p>
+            <p>Need help? <a href="mailto:support@mahaluxmihardware.com">Contact Support</a></p>
+        </div>
+    </div>
+</body>
+</html>
 
-      return res.status(200).json({ message: 'Login successful!', user });
+      `,
+    });
+
+    return res.status(200).json({ message: 'OTP sent successfully!' });
   } catch (error) {
-      console.error('Error during login:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+    console.error('Error during OTP generation:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 
+
+
+
+export const Login = async (req, res) => {
+  const { email, password, otp } = req.body;
+
+  try {
+    if (otp) {
+      const otpRecord = await otpmodel.findOne({ email, otp });
+      if (!otpRecord) {
+        return res.status(401).json({ message: 'Invalid OTP' });
+      }
+      const user = await clientModel.findOne({ email });
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+      const accessToken = createToken(user);
+      res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+      
+      await otpmodel.deleteOne({ email, otp });
+      return res.status(200).json({ message: 'Login successful with OTP!', user });
+    }
+
+    const user = await clientModel.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+    if (password !== user.password) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+    const accessToken = createToken(user);
+    
+
+    // Set cookies
+    res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+    res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
+    console.log('Cookies set successfully');
+
+    return res.status(200).json({ message: 'Login successful!', user });
+  } catch (error) {
+    console.error('Error during login:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
 export const logout = async (req, res, next) => {
   try {
-      // Clear token and role cookies
-      res.clearCookie('token');
-      res.clearCookie('role');
-
-      // Optionally, you can send a logout message or redirect the user to a different page
-      return res.status(200).json({ message: "Logout successful!" });
+    // Clear token and role cookies
+    res.clearCookie('token');
+    res.clearCookie('role');
+    return res.status(200).json({ message: "Logout successful!" });
   } catch (error) {
-      return next(createError(500, "An error occurred while logging out"))
+    return next(createError(500, "An error occurred while logging out"))
   }
 }
 
 export const Profile = async (req, res) => {
- 
+
   const { id } = req.user;
   try {
     const user = await clientModel.findById(id);
@@ -138,15 +307,15 @@ export const verification = (req, res, next) => {
 
 
 export const addProduct = async (req, res) => {
-  
+
 
   uploadImage(req, res, async function (err) {
     if (err) {
       return res.status(400).json({ message: err.message });
     }
 
-    const { name, description, price, stock, category, brand, sku} = req.body;
-    
+    const { name, description, price, stock, category, brand, sku } = req.body;
+
     try {
       // Check for existing product by SKU
       const existingProduct = await productModel.findOne({ sku });
@@ -182,7 +351,7 @@ export const addProduct = async (req, res) => {
 export const GetProduct = async (req, res) => {
   try {
     const product = await productModel.find();
-    
+
     if (!product) {
       return res.status(401).json({ message: 'product not found' });
     }
@@ -196,10 +365,10 @@ export const GetProduct = async (req, res) => {
   }
 };
 export const deleteProduct = async (req, res) => {
- 
+
   try {
-    const{productId}=req.body;
-  
+    const { productId } = req.body;
+
     const deletedProduct = await productModel.findByIdAndDelete(productId);
 
     if (!deletedProduct) {
@@ -218,8 +387,8 @@ export const createBill = async (req, res) => {
     const { customerName, contactNumber, address, productList, totalAmount } = req.body
     const formattedProductList = productList.map(product => ({
       productName: product.productName,
-      quantity: Number(product.quantity), 
-      price: Number(product.price) 
+      quantity: Number(product.quantity),
+      price: Number(product.price)
     }));
 
     // Create a new Bill object
@@ -227,8 +396,8 @@ export const createBill = async (req, res) => {
       customerName,
       contactNumber,
       address,
-      productList: formattedProductList, 
-      totalAmount: Number(totalAmount) 
+      productList: formattedProductList,
+      totalAmount: Number(totalAmount)
     });
     await newBill.save();
 
@@ -241,9 +410,9 @@ export const createBill = async (req, res) => {
 };
 export const deleteBills = async (req, res) => {
 
- 
+
   try {
-    const{billId}=req.body;
+    const { billId } = req.body;
     const deletedProduct = await BillModel.findByIdAndDelete(billId);
 
     if (!deletedProduct) {
@@ -257,7 +426,7 @@ export const deleteBills = async (req, res) => {
   }
 };
 export const getAllBills = async (req, res) => {
-  
+
   try {
     const bills = await BillModel.find();
     res.status(200).json({ message: 'Bills retrieved successfully', bills });
@@ -267,8 +436,8 @@ export const getAllBills = async (req, res) => {
   }
 };
 export const getAllUsers = async (req, res) => {
-  console.log("heloo");
-  
+
+
   try {
     const users = await clientModel.find();
     res.status(200).json({ message: 'User retrieved successfully', users });
@@ -310,7 +479,7 @@ export const updateProfile = async (req, res) => {
       return res.status(400).json({ message: err.message });
     }
 
-    const { id } = req.user; 
+    const { id } = req.user;
     const { firstName, lastName, email, mobileNumber, city, state, country } = req.body;
 
 
@@ -329,11 +498,11 @@ export const updateProfile = async (req, res) => {
       user.city = city || user.city;
       user.state = state || user.state;
       user.country = country || user.country;
-      user.password=user.password;
+      user.password = user.password;
 
-     
+
       if (req.file) {
-        user.profileImage = req.file.path; 
+        user.profileImage = req.file.path;
       }
 
       // Save the updated user
