@@ -12,22 +12,7 @@ dotenv.config();
 export const server = (req, res) => {
 
   res.status(200).send('Server is alive and working!');
-  //   sender.sendMail({
-  //     from: "patil.bhushan6898@gmail.com", // sender address
-  //     to: "bp147180@gmail.com", // list of receivers
-  //     subject: "hello bhushan", // Subject line
-  //     html:
-  //         "<!DOCTYPE html>" +
-  //         "<html><head><title></title>" +
-  //         "</head><body><div>" +
-  //         `<p>Hello,</p>` +
-  //         "<p>A request has been received to verify your email</p>" +
-  //         "<p>Your OTP is:</p>" +
-  //         `<h2></h2>` +
-  //         "<p>Thank you,</p>" +
-  //         "</div></body></html>",
-  // });
-
+ 
 };
 
 
@@ -220,10 +205,7 @@ export const Login = async (req, res) => {
       if (!user) {
         return res.status(401).json({ message: 'User not found' });
       }
-      // const accessToken = createToken(user);
-      // res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      // res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-      
+    
       await otpmodel.deleteOne({ email, otp });
       return res.status(200).json({ message: 'Login successful with OTP!', user });
     }
@@ -235,13 +217,17 @@ export const Login = async (req, res) => {
     if (password !== user.password) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-    //const accessToken = createToken(user);
-    
-
-    // // Set cookies
-    // res.cookie('token', accessToken, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-    // res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true });
-    // console.log('Cookies set successfully');
+    const accessToken = createToken(user);
+    const cookieOptions = {
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'None',
+      secure: process.env.NODE_ENV === 'production'
+    };
+    // Set cookies
+    res.cookie('token', accessToken, cookieOptions);
+    res.cookie('role', user.role, cookieOptions);
+   
 
     return res.status(200).json({ message: 'Login successful!', user });
   } catch (error) {
