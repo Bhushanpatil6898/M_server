@@ -218,14 +218,17 @@ export const Login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
     const accessToken = createToken(user);
-    const NODE_ENV = process.env.NODE_ENV; 
+   
     const cookieOptions = {
-      maxAge: 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      secure: NODE_ENV === 'production',  // secure cookies only in production
-      sameSite: 'None',
-      domain: NODE_ENV === 'production' ? 'https://mahaluxmi-hardwear.netlify.app' : 'localhost',  // Adjust based on environment
+      maxAge: 24 * 60 * 60 * 1000,  // 24 hours
+      httpOnly: true,  // Prevent client-side access to cookies
+      sameSite: 'None',  // Allow cookies across different domains
+      secure: process.env.NODE_ENV === 'production',  // Cookies should only be sent over HTTPS in production
+      domain: '.mahaluxmi-hardwear.netlify.app',
     };
+    
+    // Log cookieOptions to verify the configuration
+    console.log("Cookie options:", cookieOptions);
     
     // Set cookies
     res.cookie('token', accessToken, cookieOptions);
