@@ -222,7 +222,7 @@ export const Login = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: 'None',
-      secure: process.env.NODE_ENV === 'production'
+      domain: 'https://mahaluxmi-hardwear.netlify.app',
     };
     // Set cookies
     res.cookie('token', accessToken, cookieOptions);
