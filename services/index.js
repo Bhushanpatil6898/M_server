@@ -224,7 +224,8 @@ export const Login = async (req, res) => {
       httpOnly: true,  // Prevent client-side access to cookies
       sameSite: 'None',  // Allow cookies across different domains
       secure: process.env.NODE_ENV === 'production',  // Cookies should only be sent over HTTPS in production
-      domain: '.netlify.app',
+     domain: process.env.NODE_ENV === 'production' ? '.netlify.app' : 'localhost',
+
     };
     
     // Log cookieOptions to verify the configuration
