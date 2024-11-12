@@ -14,7 +14,11 @@ const clientSchema = new Schema({
   role: { type: String, default: "client" },
   profileImage: { type: String },
   status: { type: String, enum: ["active", "inactive"], default: "inactive" },
-  permissions: { type: String, enum: ["granted", "notGranted"], default: "notGranted" }
+  permissions: { 
+    type: String, 
+    enum: ["Granted", "notGranted"],  // Change "granted" to "Granted"
+    default: "notGranted" 
+  }
 });
 
 

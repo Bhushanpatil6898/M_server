@@ -224,11 +224,11 @@ export const Login = async (req, res) => {
       httpOnly: true,  // Prevent client-side access to cookies
       sameSite: 'None',  // Allow cookies across different domains
       secure: process.env.NODE_ENV === 'production',  // Cookies should only be sent over HTTPS in production
-      domain: '.mahaluxmi-hardwear.netlify.app',
+      //domain: '.mahaluxmi-hardwear.netlify.app',
     };
     
     // Log cookieOptions to verify the configuration
-    console.log("Cookie options:", cookieOptions);
+    
     
     // Set cookies
     res.cookie('token', accessToken, cookieOptions);
@@ -442,6 +442,7 @@ export const updatepassword = async (req, res) => {
   try {
     const { id } = req.user; // Assuming req.user is populated by authentication middleware
     const { password } = req.body;
+console.log(password,"va");
 
     // Fetch user from the database
     const user = await clientModel.findById(id);
@@ -465,24 +466,20 @@ export const updatepassword = async (req, res) => {
   }
 };
 export const updateProfile = async (req, res) => {
-  // Use the image upload middleware to handle the profile image upload
   uploadprofile(req, res, async function (err) {
     if (err) {
-      return res.status(400).json({ message: err.message });
+      return res.status(400).json({ message: "Image upload failed. " + err.message });
     }
 
     const { id } = req.user;
     const { firstName, lastName, email, mobileNumber, city, state, country } = req.body;
 
-
     try {
-      // Fetch user from the database
       const user = await clientModel.findById(id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Update user information
       user.firstName = firstName || user.firstName;
       user.lastName = lastName || user.lastName;
       user.email = email || user.email;
@@ -490,16 +487,14 @@ export const updateProfile = async (req, res) => {
       user.city = city || user.city;
       user.state = state || user.state;
       user.country = country || user.country;
-      user.password = user.password;
-
 
       if (req.file) {
         user.profileImage = req.file.path;
+      } else if (!req.file && req.body.profileImageUpdate) {
+        return res.status(400).json({ message: "No image file provided for upload." });
       }
 
-      // Save the updated user
       await user.save();
-
       return res.status(200).json({ message: "Profile updated successfully", user });
     } catch (err) {
       console.error(err);

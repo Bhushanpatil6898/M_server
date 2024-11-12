@@ -40,7 +40,9 @@ export const uploadImage = multer({
 export const uploadprofile = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      const { name } = req.body; // Extract name or any other identifier from the body
+      const { name } = req.body; 
+      console.log(req.body);
+      // Extract name or any other identifier from the body
       const destinationPath = path.join("mahaluxmi_hardware", name || "default"); // Default folder if name is not provided
 
       // Create directory if it doesn't exist
