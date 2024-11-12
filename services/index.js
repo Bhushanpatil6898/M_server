@@ -224,11 +224,11 @@ export const Login = async (req, res) => {
       httpOnly: true,  // Prevent client-side access to cookies
       sameSite: 'None',  // Allow cookies across different domains
       secure: process.env.NODE_ENV === 'production',  // Cookies should only be sent over HTTPS in production
-      //domain: '.mahaluxmi-hardwear.netlify.app',
+      domain: '.mahaluxmi-hardwear.netlify.app',
     };
     
     // Log cookieOptions to verify the configuration
-    
+    console.log("Cookie options:", cookieOptions);
     
     // Set cookies
     res.cookie('token', accessToken, cookieOptions);
@@ -247,8 +247,20 @@ export const Login = async (req, res) => {
 export const logout = async (req, res, next) => {
   try {
     // Clear token and role cookies
-    res.clearCookie('token');
-    res.clearCookie('role');
+   res.clearCookie('token', { 
+      httpOnly: true, 
+      sameSite: 'None', 
+      secure: process.env.NODE_ENV === 'production',  // Use 'true' for production environment
+    
+    });
+
+    res.clearCookie('role', { 
+      httpOnly: true, 
+      sameSite: 'None', 
+      secure: process.env.NODE_ENV === 'production', 
+    
+    });
+
     return res.status(200).json({ message: "Logout successful!" });
   } catch (error) {
     return next(createError(500, "An error occurred while logging out"))
