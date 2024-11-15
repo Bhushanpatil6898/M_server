@@ -81,3 +81,31 @@ productSchema.pre("save", function (next) {
 });
 
 export const productModel = mongoose.model("product", productSchema, "products");
+
+
+const notificationSchema = new Schema({
+  recipient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "client",
+    required: true
+  },
+  sender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "client"
+  },
+  type: {
+    type: String,
+    enum: ["productUpdate", "billing", "system", "custom"],
+    required: true
+  },
+  message: { type: String, required: true },
+  link: { type: String },
+  status: {
+    type: String,
+    enum: ["unread", "read"],
+    default: "unread"
+  },
+  createdAt: { type: Date, default: Date.now },
+  readAt: { type: Date }
+});
+export const notificationModel = mongoose.model("Notification", notificationSchema, "notifications");

@@ -2,11 +2,15 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import routes from './routes/index.js';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path, { dirname, join } from 'path';
 import cookieParser from 'cookie-parser';
+import userroutes from './routes/user/index.js';
+import productroutes from './routes/product/index.js';
+import routes from './routes/auth/index.js';
+import billroutes from './routes/bill/index.js';
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +36,9 @@ app.use(cookieParser());
 app.use("/mahaluxmi_hardware", express.static(path.join(__dirname, "mahaluxmi_hardware")));
 // Use external routes
 app.use("/", routes);
+app.use("/user", userroutes);
+app.use("/bill", billroutes);
+app.use("/product", productroutes);
 
 const DB_URI = process.env.DB_URI;
 
