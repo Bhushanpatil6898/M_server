@@ -1,10 +1,10 @@
 
-import { clientModel, otpmodel } from '../../schemas/index.js';
+import { clientModel, notificationModel, otpmodel } from '../../schemas/index.js';
 import dotenv from 'dotenv';
 import {  uploadprofile } from '../../middleware/multer/index.js';
 import { createToken } from '../../middleware/jwt/index.js';
+import logAction from '../../middleware/activity/index.js';
 dotenv.config();
-
 export const registetration = async (req, res) => {
 
   const { firstName, lastName, mobileNumber, email, password, city, state, country } = req.body;
@@ -28,6 +28,30 @@ export const registetration = async (req, res) => {
       city,
     });
     await customer.save();
+
+    const userNotification = new notificationModel({
+      recipient: customer._id, // The new customer's ID
+      type: "system",
+      message: `Welcome, ${firstName}! Your account has been successfully registered.`,
+    });
+   
+    const admin = await clientModel.findOne({ role: "admin" });
+    if (admin) {
+      const adminNotification = new notificationModel({
+        recipient: admin._id,
+        type: "system",
+        message: `New user registered: ${firstName} ${lastName} (${email}).`,
+      });
+      await adminNotification.save();
+    }
+    await userNotification.save();
+
+    logAction(
+      customer._id, 
+      'USER_REGISTERED', 
+     `A new user has joined! Name: ${firstName} ${lastName}, Email: ${email}.`,
+      req
+    );
     return res.status(200).json({ message: "Customer registered successfully" });
   } catch (error) {
     console.error(error);
@@ -50,6 +74,7 @@ export const Login = async (req, res) => {
       }
     
       await otpmodel.deleteOne({ email, otp });
+     
       return res.status(200).json({ message: 'Login successful with OTP!', user });
     }
 
@@ -63,22 +88,36 @@ export const Login = async (req, res) => {
     const accessToken = createToken(user);
    
     const cookieOptions = {
-      maxAge: 24 * 60 * 60 * 1000,  // 24 hours
-      httpOnly: true,  // Prevent client-side access to cookies
-      sameSite: 'None',  // Allow cookies across different domains
-      secure: process.env.NODE_ENV === 'production',  // Cookies should only be sent over HTTPS in production
-    //   domain: '.mahaluxmi-hardwear.netlify.app',
+      maxAge: 24 * 60 * 60 * 1000,  
+      httpOnly: true,  
+      sameSite: 'None', 
+      secure: process.env.NODE_ENV === 'production', 
     };
-    
-    // Log cookieOptions to verify the configuration
-    console.log("Cookie options:", cookieOptions);
-    
-    // Set cookies
     res.cookie('token', accessToken, cookieOptions);
     res.cookie('role', user.role, cookieOptions);
-   
-
+    const userNotification = new notificationModel({
+      recipient: user._id, 
+      type: "system",
+      message: `Welcome, ${user.firstName}, to Mahaluxmi Hardware. We are delighted to have you!`,
+    });
+    const admin = await clientModel.findOne({ role: "admin" });
+    if (admin) {
+      const adminNotification = new notificationModel({
+        recipient: admin._id,
+        type: "system",
+        message: `User logged in: ${user.firstName} ${user.lastName} (${user.email}).`,
+      });
+      await adminNotification.save();
+    }
+    await userNotification.save();
+    logAction(
+      user._id, 
+      'USER_Login', 
+     `User Login: ${user.firstName} ${user.lastName} (Email: ${email}) successfully logged in.`,
+      req
+    );
     return res.status(200).json({ message: 'Login successful!', user });
+    
   } catch (error) {
     console.error('Error during login:', error);
     return res.status(500).json({ message: 'Internal server error' });
@@ -157,6 +196,13 @@ export const updateProfile = async (req, res) => {
         }
   
         await user.save();
+        logAction(
+          user._id, 
+          'UPDATE_PROFILE', 
+        `Profile Update: ${user.firstName} ${user.lastName} (Email: ${user.email}) has updated their profile successfully.`,
+
+          req
+        );
         return res.status(200).json({ message: "Profile updated successfully", user });
       } catch (err) {
         console.error(err);
@@ -167,24 +213,29 @@ export const updateProfile = async (req, res) => {
 
 export const updatepassword = async (req, res) => {
   try {
-    const { id } = req.user; // Assuming req.user is populated by authentication middleware
+    const { id } = req.user; 
     const { password } = req.body;
 
-    // Fetch user from the database
     const user = await clientModel.findById(id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if new password is the same as the current password
     if (user.password === password) {
       return res.status(400).json({ message: "New password and old password are the same" });
     }
 
+    const oldPassword = user.password;
     // Update the password
     user.password = password;
     await user.save();
-
+    logAction(
+      user._id,
+      'PASSWORD_UPDATE',
+      `Password updated for ${user.firstName} ${user.lastName} (Email: ${user.email}). 
+       Old Password : ${oldPassword}, New Password : ${password}.`,
+      req
+    );
     return res.status(200).json({ message: "Password updated successfully" });
   } catch (err) {
     console.error(err);

@@ -13,7 +13,8 @@ import {
 import { cheack } from "../../middleware/jwt/index.js";
 
 
-cheack
+
+
 
 
 const userroutes = express.Router();
@@ -24,7 +25,5 @@ userroutes.post('/logout', logout);
 userroutes.get('/profile',cheack, Profile);
 userroutes.post('/update-password',cheack, updatepassword);
 userroutes.post('/update-profile',cheack, updateProfile);
-
-
 
 export default userroutes;

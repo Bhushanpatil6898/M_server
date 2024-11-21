@@ -95,7 +95,7 @@ const notificationSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ["productUpdate", "billing", "system", "custom"],
+    enum: ["product", "billing", "system", "custom"],
     required: true
   },
   message: { type: String, required: true },
@@ -109,3 +109,27 @@ const notificationSchema = new Schema({
   readAt: { type: Date }
 });
 export const notificationModel = mongoose.model("Notification", notificationSchema, "notifications");
+
+
+const logSchema = new Schema({
+  user: {
+    type: mongoose.Schema.Types.Mixed, // Allow ObjectId or "Anonymous"
+    required: true,
+  },
+  action: { type: String, required: true },
+  actionMessage: { type: String, required: true },
+  details: {
+    params: mongoose.Schema.Types.Mixed,
+    body: mongoose.Schema.Types.Mixed,
+    query: mongoose.Schema.Types.Mixed,
+  },
+  ipAddress: { type: String },
+  userAgent: { type: String },
+  createdAt: { type: Date, default: Date.now },
+});
+
+logSchema.path("user").validate((value) => {
+  return value === "Anonymous" || mongoose.isValidObjectId(value);
+}, "Invalid user ID");
+
+export const LogModel = mongoose.model("Log", logSchema, "logs");

@@ -11,6 +11,7 @@ import productroutes from './routes/product/index.js';
 import routes from './routes/auth/index.js';
 import billroutes from './routes/bill/index.js';
 
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,8 +23,8 @@ const __dirname = dirname(__filename);
 // Middleware
 app.use(cors({
   origin: [
-    'https://mahaluxmi-hardwear.netlify.app', // Your Netlify site
-    'http://localhost:3000'  // Localhost for development
+    'https://mahaluxmi-hardwear.netlify.app', 
+    'http://localhost:3000' 
   ],
   credentials: true  
 }));

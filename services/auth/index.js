@@ -3,7 +3,9 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
  import { sender } from '../../middleware/email/email.sender.js';
 import createOtp from 'otp-generator'
-import { clientModel,otpmodel  } from '../../schemas/index.js';
+import { clientModel,LogModel,notificationModel,otpmodel  } from '../../schemas/index.js';
+import logAction from '../../middleware/activity/index.js';
+
 dotenv.config();
 
 export const server = (req, res) => {
@@ -36,6 +38,12 @@ export const genrateotp = async (req, res) => {
       created_at: new Date(Date.now())
     });
     sendotp.save();
+    logAction(
+      user._id, // Assuming `user` has an `_id` field
+      'OTP_GENERATED',
+      `OTP generated with email: ${email}`,
+      req
+    );
 
     // Send email with the OTP
     sender.sendMail({
@@ -145,6 +153,7 @@ export const genrateotp = async (req, res) => {
 
       `,
     });
+    
 
     return res.status(200).json({ message: 'OTP sent successfully!' });
   } catch (error) {
@@ -160,7 +169,7 @@ export const getAllUsers = async (req, res) => {
       const users = await clientModel.find();
       res.status(200).json({ message: 'User retrieved successfully', users });
     } catch (error) {
-      console.error('Error retrieving Users:', error); // Log error for debugging
+      console.error('Error retrieving Users:', error); 
       res.status(500).json({ message: 'Error retrieving Users', error: error.message });
     }
   };
@@ -169,7 +178,6 @@ export const verification = (req, res, next) => {
   const cookies = req.cookies;
   const { token, role } = cookies;
 
-  // Check if token and role exist
   if (!token || !role) {
     return res.status(401).json({ message: 'User not authorized. Token or role is missing.' });
   }
@@ -177,13 +185,50 @@ export const verification = (req, res, next) => {
     if (err) {
       return res.status(403).json({ message: 'Token is not valid.' });
     }
-
-    // Attach user details to req object
     req.user = decodedUser;
     const { id } = decodedUser;
 
     // Return successful response with user id and role
     return res.status(200).json({ id, role });
   });
+};
+
+export const getNotification = async (req, res) => {
+
+  try {
+    const notification = await notificationModel.find();
+    res.status(200).json({ message: 'notification retrieved successfully', notification });
+  } catch (error) {
+    console.error('Error retrieving Users:', error); 
+    res.status(500).json({ message: 'Error retrieving Users', error: error.message });
+  }
+};
+export const getAllLogs = async (req, res) => {
+ 
+  
+  try {
+    const { page = 1, limit = 10 } = req.query; // Default pagination values
+
+    // Pagination calculations
+    const skip = (page - 1) * limit;
+
+    // Fetch all logs with pagination
+    const logs = await LogModel.find()
+      .sort({ createdAt: -1 }) // Sort logs by most recent
+      .skip(skip)
+      .limit(Number(limit));
+
+    const totalLogs = await LogModel.countDocuments();
+
+    res.status(200).json({
+      logs,
+      total: totalLogs,
+      page,
+      totalPages: Math.ceil(totalLogs / limit),
+    });
+  } catch (error) {
+    console.error("Error fetching logs:", error);
+    res.status(500).json({ message: "Error fetching logs" });
+  }
 };
 

@@ -1,9 +1,12 @@
-import BillModel from "../../schemas/index.js";
-
-
+import logAction from "../../middleware/activity/index.js";
+import BillModel, { clientModel, notificationModel } from "../../schemas/index.js";
 
 export const createBill = async (req, res) => {
+  const { id } = req.user;
+  
+    
   try {
+    const user = await clientModel.findById(id);
     const { customerName, contactNumber, address, productList, totalAmount } = req.body
     const formattedProductList = productList.map(product => ({
       productName: product.productName,
@@ -11,7 +14,6 @@ export const createBill = async (req, res) => {
       price: Number(product.price)
     }));
 
-    // Create a new Bill object
     const newBill = new BillModel({
       customerName,
       contactNumber,
@@ -20,8 +22,21 @@ export const createBill = async (req, res) => {
       totalAmount: Number(totalAmount)
     });
     await newBill.save();
-
-    // Return success response
+    const admin = await clientModel.findOne({ role: "admin" });
+    if (admin) {
+      const adminNotification = new notificationModel({
+        recipient: admin._id,
+        type: "billing",
+        message: `New bill generated for customer: ${customerName} . Total Amount: ₹${totalAmount}`,
+      });
+      await adminNotification.save();
+    }
+    logAction(
+      admin._id,
+      'CREATE_BILL',
+      `Bill created by ${user.firstName} ${user.lastName} (Email: ${user.email}) for customer: ${customerName}  with a total amount of ${totalAmount}.`,
+      req
+   );
     res.status(200).json({ message: 'Bill created successfully', bill: newBill });
   } catch (error) {
     console.error('Error creating bill:', error); // Log error for debugging
@@ -29,15 +44,22 @@ export const createBill = async (req, res) => {
   }
 };
 export const deleteBills = async (req, res) => {
-
+  const { id } = req.user;
 
   try {
     const { billId } = req.body;
-    const deletedProduct = await BillModel.findByIdAndDelete(billId);
+    const deletedbill = await BillModel.findByIdAndDelete(billId);
+    const user = await clientModel.findById(id);
 
-    if (!deletedProduct) {
+    if (!deletedbill) {
       return res.status(404).json({ message: "Bill not found" });
     }
+    logAction(
+      user._id,
+      'DELETE_BILL',
+      `Bill deleted by ${user.firstName} ${user.lastName} (Email: ${user.email}) for customer: ${deletedbill.customerName} `,
+      req
+   );
 
     return res.status(200).json({ message: "Bill deleted successfully" });
   } catch (error) {
