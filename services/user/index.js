@@ -116,6 +116,8 @@ export const Login = async (req, res) => {
      `User Login: ${user.firstName} ${user.lastName} (Email: ${email}) successfully logged in.`,
       req
     );
+    user.status = 'active';
+       await user.save();
     return res.status(200).json({ message: 'Login successful!', user });
     
   } catch (error) {
