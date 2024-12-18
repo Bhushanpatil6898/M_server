@@ -133,6 +133,7 @@ export const Login = async (req, res) => {
 
 
 export const logout = async (req, res, next) => {
+   const { id } = req.user;
   try {
     // Clear token and role cookies
    res.clearCookie('token', { 
@@ -148,6 +149,13 @@ export const logout = async (req, res, next) => {
       secure: process.env.NODE_ENV === 'production', 
     
     });
+     const user = await clientModel.findById(id);  
+    if (!user) {
+      return res.status(400).json({ message: "User not found." });
+    }
+   
+    user.status = "inactive";
+    await user.save();
 
     return res.status(200).json({ message: "Logout successful!" });
   } catch (error) {
