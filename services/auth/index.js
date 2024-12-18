@@ -22,7 +22,9 @@ export const genrateotp = async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: 'Invalid email' });
     }
-
+ if (user.permissions !== 'Granted') {
+      return res.status(401).json({ message: 'Your account does not have the necessary permissions to log in.' });
+    }
     // Generate OTP
     const otp = createOtp.generate(6, {
       upperCaseAlphabets: false,
