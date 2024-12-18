@@ -21,7 +21,7 @@ const userroutes = express.Router();
 
 userroutes.post('/register', registetration);
 userroutes.post('/login', Login);
-userroutes.post('/logout', logout);
+userroutes.post('/logout',cheack, logout);
 userroutes.get('/profile',cheack, Profile);
 userroutes.post('/update-password',cheack, updatepassword);
 userroutes.post('/update-profile',cheack, updateProfile);
