@@ -85,6 +85,9 @@ export const Login = async (req, res) => {
     if (password !== user.password) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
+     if (user.permissions !== 'Granted') {
+      return res.status(401).json({ message: 'Your account does not have the necessary permissions to log in.' });
+    }
     const accessToken = createToken(user);
    
     const cookieOptions = {
@@ -116,6 +119,9 @@ export const Login = async (req, res) => {
      `User Login: ${user.firstName} ${user.lastName} (Email: ${email}) successfully logged in.`,
       req
     );
+
+     user.status = 'active';
+       await user.save();
     return res.status(200).json({ message: 'Login successful!', user });
     
   } catch (error) {
