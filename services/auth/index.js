@@ -196,9 +196,8 @@ export const verification = (req, res, next) => {
 };
 
 export const getNotification = async (req, res) => {
-
   try {
-      const {  id ,role} = req.user; 
+    const {  id ,role} = req.user; 
     
     let notification;
 
@@ -216,10 +215,14 @@ export const getNotification = async (req, res) => {
       notification 
     });
   } catch (error) {
-    console.error('Error retrieving Users:', error); 
-    res.status(500).json({ message: 'Error retrieving Users', error: error.message });
+    console.error('Error retrieving notifications:', error);
+    res.status(500).json({ 
+      message: 'Error retrieving notifications', 
+      error: error.message 
+    });
   }
 };
+
 export const getAllLogs = async (req, res) => {
  
   
