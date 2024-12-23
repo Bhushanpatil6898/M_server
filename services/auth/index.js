@@ -198,8 +198,23 @@ export const verification = (req, res, next) => {
 export const getNotification = async (req, res) => {
 
   try {
-    const notification = await notificationModel.find();
-    res.status(200).json({ message: 'notification retrieved successfully', notification });
+      const {  id ,role} = req.user; 
+    
+    let notification;
+
+    if (role === 'admin') {
+      // Admin: Retrieve all notifications
+      notification = await notificationModel.find();
+    } else   {
+   
+      notification = await notificationModel.find({ recipient: id });
+    } 
+
+
+    res.status(200).json({ 
+      message: 'Notification retrieved successfully', 
+      notification 
+    });
   } catch (error) {
     console.error('Error retrieving Users:', error); 
     res.status(500).json({ message: 'Error retrieving Users', error: error.message });
