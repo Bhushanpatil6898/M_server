@@ -41,13 +41,29 @@ const billSchema = new mongoose.Schema({
   address: {
     type: String
   },
+  paymentMethod: {
+    type: String
+  },
+  billingDate: {
+    type: String
+  },
   productList: [
     {
       productName: { type: String, required: true },
       quantity: { type: Number, required: true },
-      price: { type: Number, required: true }
+      price: { type: Number, required: true },
+      taxrate:{ type: Number, required: true },
+      taxamount:{ type: Number, required: true },
+      taxwithamount:{ type: Number, required: true },
+      description:{ type: String, required: true },
+      total:{ type: Number, required: true },
+     
     }
   ],
+  shippingAmount: {
+    type: Number,
+    required: true
+  },
   totalAmount: {
     type: Number,
     required: true
