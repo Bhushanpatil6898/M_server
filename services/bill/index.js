@@ -3,15 +3,23 @@ import BillModel, { clientModel, notificationModel } from "../../schemas/index.j
 
 export const createBill = async (req, res) => {
   const { id } = req.user;
-  
-    
+
   try {
+
     const user = await clientModel.findById(id);
-    const { customerName, contactNumber, address, productList, totalAmount } = req.body
+    const { customerName, contactNumber, address, productList, totalAmount, shippingCharges, paymentMethod, billingDate } = req.body;
+
+
     const formattedProductList = productList.map(product => ({
       productName: product.productName,
       quantity: Number(product.quantity),
-      price: Number(product.price)
+      price: Number(product.price),
+      description: product.description,
+      taxrate: Number(product.taxrate),
+      total: Number(product.total),
+      taxamount: Number(product.taxamount),
+      taxwithamount: Number(product.totalAmount),
+
     }));
 
     const newBill = new BillModel({
@@ -19,7 +27,12 @@ export const createBill = async (req, res) => {
       contactNumber,
       address,
       productList: formattedProductList,
-      totalAmount: Number(totalAmount)
+      totalAmount: Number(totalAmount),
+      shippingAmount: Number(shippingCharges),
+      billingDate: billingDate,
+      paymentMethod,
+
+
     });
     await newBill.save();
     const admin = await clientModel.findOne({ role: "admin" });
@@ -36,7 +49,7 @@ export const createBill = async (req, res) => {
       'CREATE_BILL',
       `Bill created by ${user.firstName} ${user.lastName} (Email: ${user.email}) for customer: ${customerName}  with a total amount of ${totalAmount}.`,
       req
-   );
+    );
     res.status(200).json({ message: 'Bill created successfully', bill: newBill });
   } catch (error) {
     console.error('Error creating bill:', error); // Log error for debugging
