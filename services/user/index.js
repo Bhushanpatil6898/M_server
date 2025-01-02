@@ -257,3 +257,29 @@ export const updatepassword = async (req, res) => {
   }
 };
 
+export const updateclientdata = async (req, res) => {
+  const { _id, ...updateData } = req.body;
+
+  if (!_id) {
+    return res.status(400).json({ message: 'Client ID is required' });
+  }
+
+  try {
+    const updatedClient = await clientModel.findByIdAndUpdate(_id, updateData, {
+      new: true, // Returns the updated document
+    });
+
+    if (!updatedClient) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+
+    res.status(200).json({
+      message: 'Client updated successfully',
+      data: updatedClient,
+    });
+  } catch (error) {
+    console.error('Error updating client:', error);
+    res.status(500).json({ message: 'Error updating client', error });
+  }
+};
+
