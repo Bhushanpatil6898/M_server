@@ -7,7 +7,8 @@ import {
   registetration,
   updatepassword,
   updateProfile,
- updateclientdata
+ updateclientdata,
+ contactus
  
 } from "../../services/user/index.js"
 
@@ -27,5 +28,6 @@ userroutes.get('/profile',cheack, Profile);
 userroutes.post('/update-password',cheack, updatepassword);
 userroutes.post('/update-profile',cheack, updateProfile);
 userroutes.post('/update-client', updateclientdata);
+userroutes.post('/contact-us', contactus);
 
 export default userroutes;
