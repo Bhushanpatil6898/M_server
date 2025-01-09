@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import {  uploadprofile } from '../../middleware/multer/index.js';
 import { createToken } from '../../middleware/jwt/index.js';
 import logAction from '../../middleware/activity/index.js';
+import { sender } from '../../middleware/email/email.sender.js';
 dotenv.config();
 export const registetration = async (req, res) => {
 
@@ -280,6 +281,57 @@ export const updateclientdata = async (req, res) => {
   } catch (error) {
     console.error('Error updating client:', error);
     res.status(500).json({ message: 'Error updating client', error });
+  }
+};
+
+export const contactus = async (req, res) => {
+  const { name, email, message } = req.body;
+ 
+  try {
+   
+    await sender.sendMail({
+      from: email, 
+      to: "patil.bhushan6898@gmail.com",
+      subject: "New Contact Us Submission", 
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9;">
+          <h2 style="text-align: center; color: #007bff;">New Contact Us Submission</h2>
+          <p><strong>Dear Admin,</strong></p>
+          <p>You have received a new message from your website's <strong>Contact Us</strong> form. Below are the details:</p>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd; background-color: #f7f7f7;"><strong>Name:</strong></td>
+              <td style="padding: 10px; border: 1px solid #ddd;">${name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd; background-color: #f7f7f7;"><strong>Email:</strong></td>
+              <td style="padding: 10px; border: 1px solid #ddd;">${email}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd; background-color: #f7f7f7;"><strong>Message:</strong></td>
+              <td style="padding: 10px; border: 1px solid #ddd;">${message}</td>
+            </tr>
+          </table>
+          <p style="margin-top: 20px;">Please respond to the message as soon as possible.</p>
+          <p>Best regards,<br>Your Website Team</p>
+          <footer style="text-align: center; margin-top: 20px; color: #555;">
+            <small>&copy; ${new Date().getFullYear()} Your Company. All rights reserved.</small>
+          </footer>
+        </div>
+      `,
+    });
+
+    // Respond to the client with success
+    res.status(200).json({ success: true, message: "Details saved and email sent successfully." });
+  } catch (error) {
+    console.error("Error in Contact Us Submission:", error);
+
+    // Handle any errors that occur
+    res.status(500).json({
+      success: false,
+      message: "Error saving details or sending email.",
+      error: error.message || "Internal Server Error",
+    });
   }
 };
 
