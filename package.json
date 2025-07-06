@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "type": "module",
-  "scripts": {
-    "start": "nodemon index.js",
-    "dev": "nodemon index.js",
-    "build": "npm install"
-  },
+ "scripts": {
+  "start": "node index.js",
+  "dev": "nodemon index.js",
+  "build": "npm install"
+},
   "author": "",
   "license": "ISC",
   "dependencies": {
