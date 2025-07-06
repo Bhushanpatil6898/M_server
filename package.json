@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "build": "npm install",
+    "build": "echo 'No build needed for plain JS'",
      "preinstall": "npx npm-force-resolutions"
   },
   "author": "",
