@@ -1,8 +1,13 @@
-# node dependencies
-/node_modules
+# Ignore node_modules
+node_modules/
 
-# env files
+# Ignore environment variables
 .env
+
+# Ignore logs and cache
+*.log
+.cache/
+
 .env.*.local
 
 # nodemon logs
